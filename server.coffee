@@ -412,11 +412,27 @@ app.get '/messages/:channel', (req, res) ->
     throw err if err
     res.json(200, data.reverse())
 
+addSwappableIdentities = (deck) ->
+  faction = deck.identity.faction
+  cards = db.collection('cards').find({type: "Identity", faction: faction}).toArray (err,data) ->
+    deck.swappable_identities = data
+  deck
+
 app.get '/data/decks', (req, res) ->
   if req.user
     db.collection('decks').find({username: req.user.username}).toArray (err, data) ->
       throw err if err
-      res.json(200, data)
+      console.log("in decks")
+
+      decks = []
+      for deck in data
+        decks.push addSwappableIdentities(deck)
+
+      # setTimeout ->
+      #   res.json(200, decks)
+      # ,1000
+
+      res.json(200, decks)
   else
     db.collection('decks').find({username: "__demo__"}).toArray (err, data) ->
       throw err if err

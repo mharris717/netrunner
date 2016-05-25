@@ -7,6 +7,8 @@
 (defn init-game
   "Initializes a new game with the given players vector."
   [{:keys [players gameid] :as game}]
+  ; (println "init-game")
+  ; (pprint game)
   (let [corp (some #(when (= (:side %) "Corp") %) players)
         runner (some #(when (= (:side %) "Runner") %) players)
         corp-deck (create-deck (:deck corp))
@@ -28,6 +30,7 @@
                  :runner {:user (:user runner) :identity runner-identity
                           :deck (zone :deck (drop 5 runner-deck))
                           :hand (zone :hand (take 5 runner-deck))
+                          :swappable-identities (map #(assoc % :cid (make-cid) :zone [:swappable-identities]) (or (:swappable-identities runner) []))
                           :discard [] :scored [] :rfg [] :play-area []
                           :rig {:program [] :resource [] :hardware []}
                           :click 0 :credit 5 :run-credit 0 :memory 4 :link 0 :tag 0
