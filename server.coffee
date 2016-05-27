@@ -412,32 +412,36 @@ app.get '/messages/:channel', (req, res) ->
     throw err if err
     res.json(200, data.reverse())
 
-addSwappableIdentities = (deck) ->
-  faction = deck.identity.faction
-  cards = db.collection('cards').find({type: "Identity", faction: faction}).toArray (err,data) ->
-    deck.swappable_identities = data
-  deck
+addSwappableIdentities = (->
+  allIdentities = null
 
+  preloadIdents = ->
+    db.collection('cards').find({type: "Identity", side: "Runner", setname: {$ne: "Draft"}}).toArray (err,data) ->
+      console.log(err) if err
+      console.log "Preloaded #{data.length} IDs for Rebirth"
+      allIdentities = data
+
+  modOne = (deck) ->
+    return unless deck.identity.side == 'Runner'
+    factionIds = (ident for ident in allIdentities when ident.faction == deck.identity.faction)
+    deck.swappableidentities = factionIds
+    deck
+
+  preloadIdents()
+
+  return modOne)()
 
 app.get '/data/decks', (req, res) ->
   if req.user
     db.collection('decks').find({username: req.user.username}).toArray (err, data) ->
       throw err if err
-      console.log("in decks")
-
-      decks = []
-      for deck in data
-        decks.push addSwappableIdentities(deck)
-
-      setTimeout ->
-        res.json(200, decks)
-      ,1000
-
-      # res.json(200, decks)
+      addSwappableIdentities(deck) for deck in data
+      res.json(200, data)
   else
     db.collection('decks').find({username: "__demo__"}).toArray (err, data) ->
       throw err if err
       delete deck._id for deck in data
+      addSwappableIdentities(deck) for deck in data
       res.json(200, data)
 
 app.post '/data/decks', (req, res) ->
@@ -453,7 +457,8 @@ app.post '/data/decks', (req, res) ->
     else
       db.collection('decks').insert deck, (err, data) ->
         console.log(err) if err
-        res.json(200, data[0])
+
+        res.json(200, addSwappableIdentities(data[0]))
   else
     res.send {message: 'Unauthorized'}, 401
 
