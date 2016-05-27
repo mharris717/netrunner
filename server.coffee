@@ -457,7 +457,6 @@ app.post '/data/decks', (req, res) ->
     else
       db.collection('decks').insert deck, (err, data) ->
         console.log(err) if err
-
         res.json(200, addSwappableIdentities(data[0]))
   else
     res.send {message: 'Unauthorized'}, 401
