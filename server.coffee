@@ -412,15 +412,19 @@ app.get '/messages/:channel', (req, res) ->
     throw err if err
     res.json(200, data.reverse())
 
+# Supports Rebirth
 addSwappableIdentities = (->
   allIdentities = null
 
+  # Load Identities once at server start time
   preloadIdents = ->
     db.collection('cards').find({type: "Identity", side: "Runner", setname: {$ne: "Draft"}}).toArray (err,data) ->
       console.log(err) if err
       console.log "Preloaded #{data.length} IDs for Rebirth"
       allIdentities = data
 
+  # Add all IDs in the same faction if it's a runner deck
+  # Include the deck's ID in the list in case they want to rebirth back to their original ID
   modOne = (deck) ->
     return unless deck.identity.side == 'Runner'
     factionIds = (ident for ident in allIdentities when ident.faction == deck.identity.faction)
