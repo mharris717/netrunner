@@ -29,7 +29,7 @@
   "Returns the most recent copy of the card from the current state, as identified
   by the argument's :zone and :cid."
   [state {:keys [cid zone side host type] :as card}]
-  (if (= type "Identity")
+  (if (and (= type "Identity") (not (= :swappable-identities (first (or zone [])))))
     (get-in @state [(to-keyword side) :identity])
     (if zone
       (if host

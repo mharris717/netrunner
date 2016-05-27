@@ -1,7 +1,31 @@
 (in-ns 'game.core)
 
+; (defn update-identity [state side new-id]
+;   (swap! state update-in [side :identity] 
+;       (fn [x] (first (get-in @state [:runner :swappable-identities])))))
+
+(defn update-identity [state side new-id]
+  (println "update-identity" new-id)
+  (swap! state update-in [side :identity] 
+      (fn [x] (assoc new-id :zone [:identity]))))
+
+(defn fix-identity [state side]
+  (card-init state side (get-in @state [:runner :identity])))
+
 (def cards-events
-  {"Account Siphon"
+  {
+    "Rebirth"
+  {:msg "REBURF!!!!!"
+   :prompt "Choose a card"
+   ; :choices (req (cancellable 
+   ;   (map #(assoc % :cid (make-cid) :zone [:swappable-identities]) (:swappable-identities runner)) :sorted))
+:choices (req (cancellable (:swappable-identities runner) :sorted))
+   :effect (final-effect 
+              (disable-identity)
+              (update-identity target)
+              (fix-identity))}
+
+  "Account Siphon"
    {:effect (effect (run :hq {:req (req (= target :hq))
                               :replace-access
                               {:msg (msg "force the Corp to lose " (min 5 (:credit corp))
