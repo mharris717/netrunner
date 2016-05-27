@@ -30,7 +30,7 @@
                  :runner {:user (:user runner) :identity runner-identity
                           :deck (zone :deck (drop 5 runner-deck))
                           :hand (zone :hand (take 5 runner-deck))
-                          :swappable-identities (map #(assoc % :cid (make-cid) :zone [:swappable-identities]) (or (:swappable-identities runner) []))
+                          :swappable-identities (map #(assoc % :cid (make-cid) :zone [:swappable-identities]) (or (:swappable-identities (:deck runner)) (:swappable_identities (:deck runner)) []))
                           :discard [] :scored [] :rfg [] :play-area []
                           :rig {:program [] :resource [] :hardware []}
                           :click 0 :credit 5 :run-credit 0 :memory 4 :link 0 :tag 0

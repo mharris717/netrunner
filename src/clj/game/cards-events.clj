@@ -7,7 +7,10 @@
 (defn update-identity [state side new-id]
   (println "update-identity" new-id)
   (swap! state update-in [side :identity] 
-      (fn [x] new-id)))
+      (fn [x] (assoc new-id :zone [:identity]))))
+
+(defn fix-identity [state side]
+  (card-init state side (get-in @state [:runner :identity])))
 
 (def cards-events
   {
@@ -20,7 +23,7 @@
    :effect (final-effect 
               (disable-identity)
               (update-identity target)
-              (enable-identity))}
+              (fix-identity))}
 
   "Account Siphon"
    {:effect (effect (run :hq {:req (req (= target :hq))
